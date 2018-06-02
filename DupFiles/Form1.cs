@@ -171,19 +171,23 @@ namespace DupFiles
                 foreach (FileInfo file in duplicateFiles)
                 {
                     UpdateStatus("Quick Hashing Pontential Duplicate {0}", file.FullName);
-                    using (FileStream stream = new FileStream(file.FullName, FileMode.Open, FileAccess.Read))
+                    try
                     {
-                        if (stream.Read(buffer, 0, buffer.Length) == buffer.Length)
+                        using (FileStream stream = new FileStream(file.FullName, FileMode.Open, FileAccess.Read))
                         {
-                            byte[] hashValue = hashProvider.ComputeHash(buffer);
-                            string hashValueStr = ToHEX(hashValue);
-                            if (!probableDupes.ContainsKey(hashValueStr))
+                            if (stream.Read(buffer, 0, buffer.Length) == buffer.Length)
                             {
-                                probableDupes[hashValueStr] = new List<FileInfo>();
+                                byte[] hashValue = hashProvider.ComputeHash(buffer);
+                                string hashValueStr = ToHEX(hashValue);
+                                if (!probableDupes.ContainsKey(hashValueStr))
+                                {
+                                    probableDupes[hashValueStr] = new List<FileInfo>();
+                                }
+                                probableDupes[hashValueStr].Add(file);
                             }
-                            probableDupes[hashValueStr].Add(file);
                         }
                     }
+                    catch (Exception ex) { }
                 }
                 
                 j++;
@@ -205,16 +209,20 @@ namespace DupFiles
                     foreach (FileInfo file in duplicateFiles)
                     {
                         UpdateStatus("Hashing Probable Duplicate {0}", file.FullName);
-                        using (FileStream stream = new FileStream(file.FullName, FileMode.Open, FileAccess.Read))
+                        try
                         {
-                            byte[] hashValue = hashProvider.ComputeHash(stream);
-                            string hashValueStr = ToHEX(hashValue);
-                            if (!realDupes.ContainsKey(hashValueStr))
+                            using (FileStream stream = new FileStream(file.FullName, FileMode.Open, FileAccess.Read))
                             {
-                                realDupes[hashValueStr] = new List<FileInfo>();
+                                byte[] hashValue = hashProvider.ComputeHash(stream);
+                                string hashValueStr = ToHEX(hashValue);
+                                if (!realDupes.ContainsKey(hashValueStr))
+                                {
+                                    realDupes[hashValueStr] = new List<FileInfo>();
+                                }
+                                realDupes[hashValueStr].Add(file);
                             }
-                            realDupes[hashValueStr].Add(file);
                         }
+                        catch (Exception) { }
                     }
                 }
                 j++;
